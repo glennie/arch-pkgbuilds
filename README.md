@@ -13,3 +13,6 @@ version 0.7.5-2 - Tue May 31 2014
   * Added arch related stuff
   * Cleaned debian related stuff
   * Moved templates from /usr/share/tinyca2 to /etc/tinyca
+
+##linux-nemesis
+  * PKGBUILD for my custom kernel. The sources are pulled from Linus' git repository
