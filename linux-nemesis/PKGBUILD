@@ -6,9 +6,7 @@
 # Contributor: Tobias Powalowski <tpowa@archlinux.org>
 # Contributor: Thomas Baechler <thomas@archlinux.org>
 
-set -e
 USE_STATIC_CONFIG=${SCONFIG:-0}
-
 OLD_CONFIG_ONLY=${XCONFIG:-0}
 FBUILD=${XCONFIG:-1}
 
@@ -22,12 +20,16 @@ fi
 
 cd - > /dev/null
 
-pkgname=linux-nemesis
 
-pkgbase=${pkgname}
+VERSION=$(cd /usr/src/linux.git ; git describe --long | sed -E 's/^v//;s/([^-]*-g)/r\1/;s/-/./g' ; cd - > /dev/null)
+LOCAL_VERSION=$(echo $VERSION | sed -e 's/\./-/g')
+pkgver=${VERSION}
+
+pkgname=linux-nemesis-${LOCAL_VERSION}
+
+pkgbase=linux-nemesis
 _srcname=linux
-pkgver=$(cd /usr/src/linux.git ; git describe --long | sed -E 's/^v//;s/([^-]*-g)/r\1/;s/-/./g' ; cd - > /dev/null)
-_kernelname=${pkgbase}-${pkgver}
+_kernelname=${pkgname}
 pkgrel=1
 arch=('x86_64')
 url="http://www.kernel.org/"
@@ -37,21 +39,15 @@ options=('!strip')
 source=('git+file:///usr/src/linux.git')
 md5sums=('SKIP')
 
-# Work around AUR parser
-# https://bugs.archlinux.org/task/16394
-#pkgname+=("${pkgbase}-headers" "${pkgbase}-docs")
-
 pkgver() {
 #{{{ 
-  cd "${srcdir}/${_srcname}"
-  git describe --long | sed -E 's/^v//;s/([^-]*-g)/r\1/;s/-/./g'
+  echo ${VERSION}
 }
 #}}}
 
 prepare() {
 #{{{
   cd "${srcdir}/${_srcname}"
-
   # Use saved config if it exists
   if [ "$(grep ^EXTRAVERSION Makefile | grep -q eudyptula ; echo $?)" != "0" ] ; then
     sed -i -e 's/^\(EXTRAVERSION =.*\)/\1-eudyptula/g' Makefile
@@ -88,12 +84,13 @@ build() {
 }
 #}}}
 
-package_linux-nemesis() {
+package() {
 #{{{
-  pkgdesc="The Linux kernel and modules (localy compiled from Git)"
+
+  pkgdesc="The Linux kernel and modules (locally compiled from Git)"
   depends=('coreutils' 'kmod' 'mkinitcpio>=0.7')
-  provides=("kernel-nemesis ${_kernelname}=${pkgver}")
   replaces=("${_kernelname}=${pkgver}")
+  provides=("${_kernelname}=${pkgver}")
   backup=("etc/mkinitcpio.d/${_kernelname}.preset")
 
   cd "${srcdir}/${_srcname}"
@@ -132,10 +129,10 @@ package_linux-nemesis() {
   # gzip -9 all modules to save 100MB of space
   find "${pkgdir}" -name '*.ko' -exec gzip -9 {} \;
   # make room for external modules
-  ln -s "../extramodules-${_basekernel}-${_kernelname:--ARCH}" "${pkgdir}/lib/modules/${_kernver}/extramodules"
+  ln -s "../extramodules-${_basekernel}-${_kernelname}" "${pkgdir}/lib/modules/${_kernver}/extramodules"
   # add real version for building modules and running depmod from post_install/upgrade
-  mkdir -p "${pkgdir}/lib/modules/extramodules-${_basekernel}-${_kernelname:--ARCH}"
-  echo "${_kernver}" > "${pkgdir}/lib/modules/extramodules-${_basekernel}-${_kernelname:--ARCH}/version"
+  mkdir -p "${pkgdir}/lib/modules/extramodules-${_basekernel}-${_kernelname}"
+  echo "${_kernver}" > "${pkgdir}/lib/modules/extramodules-${_basekernel}-${_kernelname}/version"
 
   # Now we call depmod...
   depmod -b "${pkgdir}" -F System.map "${_kernver}"
