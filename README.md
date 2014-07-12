@@ -21,3 +21,6 @@ version 0.7.5-2 - Tue May 31 2014
 Version 0.20-1 - 26 June 2014
 * This will build file-rename which can be used to rename files' using perl regular expressions. This package is different from perl-rename. As debian debian user, I used to use File::Rename provided by 'rename' package on debian. This PKGBUILD will build that same package and install it as file-rename. Add "alias rename='file-rename'" to use this as the default.
 
+##python-robobrowser
+Version 0.3.1 - Sat July 12 2014
+  * RoboBrowser is a simple, Pythonic library for browsing the web without a standalone web browser.
