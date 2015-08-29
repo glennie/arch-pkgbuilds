@@ -1,5 +1,5 @@
 #arch-pkgbuilds
-##tinyCA2 - version 0.7.5-2
+##tinyCA2 - version 0.7.5-3
 * The source is avilaible at https://github.com/glennie/tinyca2
 * The package contains also 'fix-tinyca-paths.patch' and the modified PKGBUILD from arch aur repository. I'm not sure the author for fix-tinyca-paths.patch', but, the credits for the PKGBUILD must go to Marti Raudsepp <marti@juffo.org>
 
@@ -14,6 +14,9 @@ version 0.7.5-2 - Tue May 31 2014
   * Cleaned debian related stuff
   * Moved templates from /usr/share/tinyca2 to /etc/tinyca
 
+version 0.7.5-3 - Sat August 29 2015
+  * added patches sub dir currently used patches
+    * Added sha2 support by a patch stolen from Debian bug tracking system (https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=759481#10). The patch is from Ross Vandegrift <ross@kallisti.us>
 ##linux-nemesis
   * PKGBUILD for my custom kernel. The sources are pulled from Linus' git repository
 
