@@ -9,16 +9,25 @@
 USE_STATIC_CONFIG=${SCONFIG:-0}
 OLD_CONFIG_ONLY=${XCONFIG:-0}
 FBUILD=${XCONFIG:-1}
+SRC_UPDATE=${SRC_UPDATE:-0}
 
 test -f /usr/src/linux && rm /usr/src/linux
-cd /usr/src/linux.git ; 
-git pull | tee /dev/stderr | grep -q 'Already up-to-date.'
+GIT_RCODE=0
 
-if [ "$?" != "0" -a "$FBUILD" = "0" ] ; then
-  exit
+if [ "$SRC_UPDATE" = "0" ]; then
+  echo "Updating sources via GIT"
+  cd /usr/src/linux.git ;
+  git pull | tee /dev/stderr | grep -q 'Already up-to-date.'
+  GIT_RCODE=$?
+  cd - > /dev/null
+else
+  echo "Updating sources via GIT skipped"
+  sleep 2
 fi
 
-cd - > /dev/null
+if [ "$GIT_RCODE" != "0" -a "$FBUILD" = "0" ] ; then
+  exit
+fi
 
 
 VERSION=$(cd /usr/src/linux.git ; git describe --long | sed -E 's/^v//;s/([^-]*-g)/r\1/;s/-/./g' ; cd - > /dev/null)
@@ -40,7 +49,7 @@ source=('git+file:///usr/src/linux.git')
 md5sums=('SKIP')
 
 pkgver() {
-#{{{ 
+#{{{
   echo ${VERSION}
 }
 #}}}
@@ -67,8 +76,8 @@ prepare() {
   # get kernel version
   make prepare
   make oldconfig # using old config from previous kernel version
-  #sudo /usr/bin/modprobed-db recall  
-  #make localmodconfig  
+  #sudo /usr/bin/modprobed-db recall
+  #make localmodconfig
 
 
   if [ "$OLD_CONFIG_ONLY" != "0"  ] ; then
@@ -114,7 +123,7 @@ package() {
     -i "${startdir}/${install}"
 
   # install mkinitcpio config file for kernel
-  install -D -m644 "/usr/src/arch/preset" "${pkgdir}/etc/mkinitcpio.d/${_kernelname}.preset"
+  install -D -m644 "/data/data/projects/arch-pkgbuilds/linux-nemesis/preset" "${pkgdir}/etc/mkinitcpio.d/${_kernelname}.preset"
   sed \
     -e "1s|'linux.*'|'${pkgbase}'|" \
     -e "s|ALL_kver=.*|ALL_kver=\"/boot/vmlinuz-${_kernelname}\"|" \
@@ -142,7 +151,7 @@ package() {
   mv "${pkgdir}/lib" "${pkgdir}/usr/"
 
   # add vmlinux
-  install -D -m644 vmlinux "${pkgdir}/usr/lib/modules/${_kernver}/build/vmlinux" 
+  install -D -m644 vmlinux "${pkgdir}/usr/lib/modules/${_kernver}/build/vmlinux"
 }
 #}}}
 

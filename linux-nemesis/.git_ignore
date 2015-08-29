@@ -1,0 +1,8 @@
+.*
+*.o
+*.ko
+*.cmd
+.tmp_versions
+.linux-nemesis.install.pkg
+*.pkg.tar.xz
+pkg.tar.xz
